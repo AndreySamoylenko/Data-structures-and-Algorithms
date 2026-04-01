@@ -1,5 +1,6 @@
 // ------------------ двусвязный сортированный список ----------------------
 #include <cstddef> // Для std::size_t
+#include <stack>
 
 struct list_node
 {
@@ -31,6 +32,8 @@ public:
 
         delete head;
     }
+
+    bool empty() const { return head == nullptr; }
 
     void add(size_t data)
     {
@@ -110,23 +113,26 @@ public:
 
 #include <DataManager.hpp>
 
-// #include <functional>
-
 template <class T>
 struct Node
 {
     Node *parent = nullptr;
     Node *left = nullptr;
     Node *right = nullptr;
+    PersonalData p_data;
     Key key;
     T data;
     bool red = true; // новый узел — красный
 };
+// ------------------ красно-чёрное дерево ----------------------
+// обход справа налево
+// при удалении максимальный справа
+// ключ — дата + фио
 
 class RBtree : public IndexedStructure
 {
 private:
-    using N = Node<List*>;
+    using N = Node<List *>;
     N *root = nullptr;
 
     bool is_red(N *x) const { return x && x->red; }
@@ -232,7 +238,7 @@ private:
 
         N *y = nullptr;
         N *x = root;
-
+        // доходим до места вставки
         while (x)
         {
             y = x;
@@ -243,13 +249,13 @@ private:
             else
                 break;
         }
-        
+        // если ключ уже есть, просто добавляем индекс в список
         if (y == x)
         {
             x->data->add(record.array_index);
             return root;
         }
-
+        // иначе вставляем новый узел
         N *z = new N{};
         z->key = record.key;
         z->data->add(record.array_index);
@@ -296,6 +302,13 @@ private:
     {
         while (x->left)
             x = x->left;
+        return x;
+    }
+
+    N *maximum(N *x) const
+    {
+        while (x->right)
+            x = x->right;
         return x;
     }
 
@@ -378,8 +391,29 @@ private:
             x->red = false;
     }
 
+    ~RBtree()
+    {
+        if (!root)
+            return;
+
+        std::stack<N *> s;
+        s.push(root);
+        while (!s.empty())
+        {
+            N *current = s.top();
+            s.pop();
+            if (current->left)
+                s.push(current->left);
+            if (current->right)
+                s.push(current->right);
+            delete current;
+        }
+    }
+
 public:
     RBtree() = default;
+
+    bool empty() const { return root == nullptr; }
 
     void add(const PersonalData &record) override
     {
@@ -393,10 +427,19 @@ public:
         return (find_node(key)->data);
     }
 
-    void remove(const Key &key) override
+    void remove(const Key &key, const size_t &array_index) override
     {
         N *z = find_node(key);
+        // если узла с таким ключом нет, или он есть, но в его списке нет такого индекса, то удалять нечего
         if (!z)
+            return;
+        // если узел есть, но в его списке нет такого индекса, то удалять нечего
+        if (!(z->data->find_value(array_index)))
+            return;
+        // удаляем индекс из списка узла
+        z->data->remove(array_index);
+        //  если после удаления список узла не пуст, то удалять узел не нужно
+        if (!z->data->empty())
             return;
 
         N *y = z;
@@ -418,9 +461,9 @@ public:
         }
         else
         {
-            y = minimum(z->right);
+            y = maximum(z->left);
             yOriginalRed = y->red;
-            x = y->right;
+            x = y->left;
             if (y->parent == z)
             {
                 if (x)
@@ -429,14 +472,14 @@ public:
             }
             else
             {
-                transplant(y, y->right);
-                y->right = z->right;
-                y->right->parent = y;
+                transplant(y, y->left);
+                y->left = z->left;
+                y->left->parent = y;
                 xParent = y->parent;
             }
             transplant(z, y);
-            y->left = z->left;
-            y->left->parent = y;
+            y->right = z->right;
+            y->right->parent = y;
             y->red = z->red;
         }
 
@@ -457,8 +500,39 @@ public:
         if (!(n->data->find_value(old_data.array_index)))
             return;
 
-        remove(old_key);
+        remove(old_key, old_data.array_index);
         add(new_data);
+    }
+
+    // обход дерева справа налево
+    void print_in_order(N *node) const
+    {
+        if (!node)
+            return;
+        print_in_order(node->right);
+        std::cout << node->key << std::endl;
+        print_in_order(node->left);
+    }
+
+    void print() const
+    {
+        print_in_order(root);
+    }
+
+    // печать структуры дерева 
+    void print_structure(N *node, int indent = 0) const
+    {
+        if (node)
+        {
+            print_structure(node->right, indent + 4);
+            std::cout << std::string(indent, ' ') << (node->red ? "R" : "B") << ": " << node->key << std::endl;
+            print_structure(node->left, indent + 4);
+        }
+    }
+
+    void print_tree_structure() const
+    {
+        print_structure(root);
     }
 };
 
@@ -481,18 +555,22 @@ public:
     }
     void remove(const Key &key)
     {
-        for(int index = 0; index < a_size; index++){
-            if(array[index].key == key){
-                array[index] = array[a_size-1];
-                a_size --;
+        for (int index = 0; index < a_size; index++)
+        {
+            if (array[index].key == key)
+            {
+                array[index] = array[a_size - 1];
+                a_size--;
                 return;
             }
         }
     }
     void update(const PersonalData &old_data, const PersonalData &new_data)
     {
-        for(int index = 0; index < a_size; index++){
-            if(array[index] == old_data){
+        for (int index = 0; index < a_size; index++)
+        {
+            if (array[index] == old_data)
+            {
                 array[index] = new_data;
                 return;
             }

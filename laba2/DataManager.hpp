@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <iostream>
+
 
 struct Date
 {
@@ -13,6 +15,11 @@ struct Date
     bool operator>(const Date &o) const { return date_to_number(*this) > date_to_number(o); }
     bool operator==(const Date &o) const { return date_to_number(*this) == date_to_number(o); }
     bool operator!=(const Date &o) const { return date_to_number(*this) != date_to_number(o); }
+    friend std::ostream &operator<<(std::ostream &os, const Date &d)
+    {
+        os << d.day << "." << d.month << "." << d.year;
+        return os;
+    }
 };
 
 struct FIO
@@ -43,6 +50,13 @@ struct FIO
     }
     bool operator==(const FIO &o) const { return (surname == o.surname && name == o.name && patronymic == o.patronymic); }
     bool operator!=(const FIO &o) const { return !(surname == o.surname && name == o.name && patronymic == o.patronymic); }
+
+    friend std::ostream &operator<<(std::ostream &os, const FIO &f)
+    {
+        os << f.surname << " " << f.name << " " << f.patronymic;
+        return os;
+    }
+
 };
 
 struct Key
@@ -73,6 +87,11 @@ struct Key
     {
         return !(date == o.date && full_name == o.full_name);
     }
+    friend std::ostream &operator<<(std::ostream &os, const Key &k)
+    {
+        os << k.date << " | " << k.full_name;
+        return os;
+    }
 };
 
 struct PersonalData
@@ -89,7 +108,12 @@ struct PersonalData
     bool operator>(const PersonalData &o) const { return (key > o.key); }
     bool operator==(const PersonalData &o) const
     {
-        return (date==o.date) && (full_name == o.full_name) && (request_number == o.request_number) && (description == o.description);
+        return (date == o.date) && (full_name == o.full_name) && (request_number == o.request_number) && (description == o.description);
+    }
+    friend std::ostream &operator<<(std::ostream &os, const PersonalData &pd)
+    {
+        os << pd.date << " | " << pd.full_name << " | " << pd.request_number << " | " << pd.description;
+        return os;
     }
 };
 
@@ -97,7 +121,7 @@ class Repository
 {
 public:
     virtual void add(PersonalData &record) = 0;
-    virtual void remove(const Key &key) = 0;
+    virtual void remove(const Key &key, const size_t &array_index) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
 };
 
@@ -105,7 +129,7 @@ class IndexedStructure
 {
 public:
     virtual void add(const PersonalData &record) = 0;
-    virtual void remove(const Key &key) = 0;
+    virtual void remove(const Key &key, const size_t &array_index) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
 };
 
@@ -122,10 +146,10 @@ public:
         data_bank.add(record);
     };
 
-    void remove(const Key &key)
+    void remove(const Key &key, const size_t &array_index)
     {
-        indexed_struct.remove(key);
-        data_bank.remove(key);
+        indexed_struct.remove(key, array_index);
+        data_bank.remove(key, array_index);
     };
 
     void update(const PersonalData &old_data, const PersonalData &new_data)
