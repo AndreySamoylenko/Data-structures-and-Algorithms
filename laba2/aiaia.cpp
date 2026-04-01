@@ -1,5 +1,5 @@
-#include <DataManager.hpp>
-#include <DataStorage.tpp>
+#include "DataManager.hpp"
+#include "DataStorage.tpp"
 
 #include <fstream>
 #include <iostream>
@@ -76,7 +76,13 @@ void read_data_from_file(const std::string &filename, DataManager &manager)
 }
 
 int main()
-{
+{   
+    RBtree tree;
+    Array array;
+    DataManager manager(tree, array);
+    read_data_from_file("input.txt", manager);
+    manager.get_indexed_structure().print_structure();
+    manager.get_data_bank().print_repository();
 
     return 0;
 }

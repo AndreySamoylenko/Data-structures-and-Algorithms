@@ -123,6 +123,7 @@ public:
     virtual void add(PersonalData &record) = 0;
     virtual void remove(const Key &key, const size_t &array_index) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
+    virtual void print_repository() const = 0;
 };
 
 class IndexedStructure
@@ -131,6 +132,7 @@ public:
     virtual void add(const PersonalData &record) = 0;
     virtual void remove(const Key &key, const size_t &array_index) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
+    virtual void print_structure() const = 0;
 };
 
 class DataManager
@@ -140,6 +142,8 @@ private:
     Repository &data_bank;
 
 public:
+    DataManager(IndexedStructure &indexed_struct, Repository &data_bank) : indexed_struct(indexed_struct), data_bank(data_bank) {}
+
     void add(PersonalData &record)
     {
         indexed_struct.add(record);
@@ -157,4 +161,9 @@ public:
         indexed_struct.update(old_data, new_data);
         data_bank.update(old_data, new_data);
     };
+
+    IndexedStructure &get_indexed_structure() const { return indexed_struct; }
+    Repository &get_data_bank() const { return data_bank; }
+
+    ~DataManager() = default;
 };

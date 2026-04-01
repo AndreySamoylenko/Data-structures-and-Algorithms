@@ -1,5 +1,7 @@
 // ------------------ двусвязный сортированный список ----------------------
-#include <cstddef> // Для std::size_t
+#include <iostream>
+#include <string>
+#include <cstddef>
 #include <stack>
 
 struct list_node
@@ -111,7 +113,7 @@ public:
     }
 };
 
-#include <DataManager.hpp>
+#include "DataManager.hpp"
 
 template <class T>
 struct Node
@@ -391,6 +393,8 @@ private:
             x->red = false;
     }
 
+public:
+    RBtree() = default;
     ~RBtree()
     {
         if (!root)
@@ -409,9 +413,6 @@ private:
             delete current;
         }
     }
-
-public:
-    RBtree() = default;
 
     bool empty() const { return root == nullptr; }
 
@@ -519,21 +520,22 @@ public:
         print_in_order(root);
     }
 
-    // печать структуры дерева 
-    void print_structure(N *node, int indent = 0) const
+    // печать структуры дерева
+    void print_structured(N *node, int indent = 0) const
     {
         if (node)
         {
-            print_structure(node->right, indent + 4);
+            print_structured(node->right, indent + 4);
             std::cout << std::string(indent, ' ') << (node->red ? "R" : "B") << ": " << node->key << std::endl;
-            print_structure(node->left, indent + 4);
+            print_structured(node->left, indent + 4);
         }
     }
 
-    void print_tree_structure() const
+    void print_structure() const
     {
-        print_structure(root);
+        print_structured(root);
     }
+
 };
 
 class Array : public Repository
@@ -549,15 +551,15 @@ public:
         if (a_size == a_capacity)
             return;
 
-        array[a_size] = record;
         record.array_index = a_size;
+        array[a_size] = record;
         a_size++;
     }
-    void remove(const Key &key)
+    void remove(const Key &key, const size_t &array_index) override
     {
-        for (int index = 0; index < a_size; index++)
+        for (size_t index = 0; index < a_size; index++)
         {
-            if (array[index].key == key)
+            if (array[index].key == key && array[index].array_index == array_index)
             {
                 array[index] = array[a_size - 1];
                 a_size--;
@@ -567,13 +569,20 @@ public:
     }
     void update(const PersonalData &old_data, const PersonalData &new_data)
     {
-        for (int index = 0; index < a_size; index++)
+        for (size_t index = 0; index < a_size; index++)
         {
             if (array[index] == old_data)
             {
                 array[index] = new_data;
                 return;
             }
+        }
+    }
+    void print_repository() const
+    {
+        for (size_t index = 0; index < a_size; index++)
+        {
+            std::cout << array[index] << std::endl;
         }
     }
 };
