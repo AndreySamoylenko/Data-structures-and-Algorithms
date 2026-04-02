@@ -1,8 +1,12 @@
-// ------------------ двусвязный сортированный список ----------------------
+#pragma once
+
 #include <iostream>
 #include <string>
 #include <cstddef>
 #include <stack>
+
+// ------------------ двусвязный сортированный список ----------------------
+
 
 struct list_node
 {
