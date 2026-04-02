@@ -273,7 +273,7 @@ private:
     N *BST_insert(const PersonalData &record)
     {
         Key key = record.key();
-        // std::cout << "inserting " << key << std::endl;
+        std::cout << "inserting " << key << std::endl;
 
         N *y = nullptr;
         N *x = root;
@@ -281,24 +281,25 @@ private:
         while (x)
         {
             y = x;
+            std::cout << "traversing " << x->key << std::endl;
             if (key < x->key)
                 x = x->left;
             else if (key < x->key)
                 x = x->right;
-            else
-                break;
+            else if (x->key == key)
+            { // если ключ уже есть, то просто добавляем индекс в список узла
+                std::cout << "adding index to existing key " << key << std::endl;
+                x->data.add(record.array_index);
+                return nullptr;
+            }
         }
-        // std::cout << "traversed to insert place succsesfully\n";
-        // если ключ уже есть, просто добавляем индекс в список
-        if (y == x and x)
-        {
-            x->data.add(record.array_index);
-            return nullptr;
-        }
-        // иначе вставляем новый узел
+        std::cout << "traversed to insert place succsesfully\n";
+
+        // вставляем новый узел
         N *z = new N;
         z->key = record.key();
         z->data.add(record.array_index);
+
         std::cout << z->data << std::endl;
         z->parent = y;
         if (!y)
@@ -435,10 +436,15 @@ private:
     void print_ordered(N *node) const
     {
         if (!node)
-            return;
-        print_ordered(node->right);
-        std::cout << node->key << std::endl;
-        print_ordered(node->left);
+        {
+            std::cout << "null\n";
+        }
+        else
+        {
+            print_ordered(node->right);
+            std::cout << node->key << std::endl;
+            print_ordered(node->left);
+        }
     }
 
     // печать структуры дерева
@@ -449,6 +455,10 @@ private:
             print_structured(node->right, indent + 4);
             std::cout << std::string(indent, ' ') << (node->red ? "R" : "B") << ": " << node->key << " " << node->data << std::endl;
             print_structured(node->left, indent + 4);
+        }
+        else
+        {
+            std::cout << std::string(indent, ' ') << "null\n";
         }
     }
 

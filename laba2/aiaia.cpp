@@ -106,28 +106,35 @@ int main()
     std::cout << pd.key() << std::endl;
 
     tree.add(pd);
-    pd.date = {1, 1, 0};
-    pd.full_name.name = "aa";
     tree.add(pd);
-    pd.date = {1, 1, 1};
     tree.add(pd);
-    pd.date = {1, 1, 1};
-    pd.full_name.name = "aaa";
-    tree.add(pd);
-    pd.date = {1, 1, 1};
-    tree.add(pd);
-    pd.date = {1, 2, 1};
-    tree.add(pd);
-    pd.date = {1, 2, 1};
-    pd.full_name.name = "asa";
-    tree.add(pd);
-    pd.date = {1, 1, 3};
-    tree.add(pd);
-    pd.date = {3, 1, 1};
-    tree.add(pd);
-
     tree.print_structure();
-    tree.print_in_order();
+
+    // pd.date = {1, 1, 0};
+    // tree.add(pd);
+
+
+    // pd.full_name.name = "aa";
+    // tree.add(pd);
+    // pd.date = {1, 1, 1};
+    // tree.add(pd);
+    // pd.date = {1, 1, 1};
+    // pd.full_name.name = "aaa";
+    // tree.add(pd);
+    // pd.date = {1, 1, 1};
+    // tree.add(pd);
+    // pd.date = {1, 2, 1};
+    // tree.add(pd);
+    // pd.date = {1, 2, 1};
+    // pd.full_name.name = "asa";
+    // tree.add(pd);
+    // pd.date = {1, 1, 3};
+    // tree.add(pd);
+    // pd.date = {3, 1, 1};
+    // tree.add(pd);
+
+    // tree.print_structure();
+    // tree.print_in_order();
 
     return 0;
 }
