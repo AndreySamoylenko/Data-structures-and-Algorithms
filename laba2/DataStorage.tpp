@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <stack>
 
-// ------------------ ‰‚ÛÒ‚ˇÁÌ˚È ÒÓÚËÓ‚‡ÌÌ˚È ÒÔËÒÓÍ ----------------------
+// ------------------ –¥–≤—É—Å–≤—è–∑–Ω—ã–π —Å–æ—Ä—Ç–∏—Ä–æ–≤–∞–Ω–Ω—ã–π —Å–ø–∏—Å–æ–∫ ----------------------
 
 struct ListNode
 {
@@ -20,7 +20,7 @@ private:
     ListNode *head = nullptr;
 
 public:
-    List() {}
+    List() { head = nullptr; }
     ~List()
     {
         if (!head)
@@ -58,7 +58,7 @@ public:
 
         ListNode *current = head;
 
-        // Ë˘ÂÏ ÏÂÒÚÓ ‚ÒÚ‡‚ÍË
+        // –∏—â–µ–º –º–µ—Å—Ç–æ –≤—Å—Ç–∞–≤–∫–∏
         do
         {
             if (data >= current->data)
@@ -67,13 +67,13 @@ public:
             current = current->next;
         } while (current != head);
 
-        // ‚ÒÚ‡‚Í‡ ÔÂÂ‰ current
+        // –≤—Å—Ç–∞–≤–∫–∞ –ø–µ—Ä–µ–¥ current
         new_node->next = current;
         new_node->previous = current->previous;
         current->previous->next = new_node;
         current->previous = new_node;
 
-        // ÂÒÎË ‚ÒÚ‡‚ËÎË ÔÂÂ‰ head ? Ó·ÌÓ‚ÎˇÂÏ head
+        // –µ—Å–ª–∏ –≤—Å—Ç–∞–≤–∏–ª–∏ –ø–µ—Ä–µ–¥ head ‚Üí –æ–±–Ω–æ–≤–ª—è–µ–º head
         if (current == head && data >= current->data)
         {
             head = new_node;
@@ -110,11 +110,11 @@ public:
     }
     bool find_value(size_t value)
     {
-        if (!head) // ÂÒÎË ÒÔËÒÓÍ ÔÛÒÚ
+        if (!head) // –µ—Å–ª–∏ —Å–ø–∏—Å–æ–∫ –ø—É—Å—Ç
             return 0;
-        if (head->data < value) // ÂÒÎË ‚ÒÂ ÁÌ‡˜ÂÌËˇ ÒÔËÒÍ‡ ÏÂÌ¸¯Â ËÒÍÓÏÓ„Ó
+        if (head->data < value) // –µ—Å–ª–∏ –≤—Å–µ –∑–Ω–∞—á–µ–Ω–∏—è —Å–ø–∏—Å–∫–∞ –º–µ–Ω—å—à–µ –∏—Å–∫–æ–º–æ–≥–æ
             return 0;
-        if (head->previous->data > value) // ÂÒÎË ‚ÒÂ ÁÌ‡˜ÂÌËˇ ÒÔËÒÍ‡ ·ÓÎ¸¯Â ËÒÍÓÏÓ„Ó
+        if (head->previous->data > value) // –µ—Å–ª–∏ –≤—Å–µ –∑–Ω–∞—á–µ–Ω–∏—è —Å–ø–∏—Å–∫–∞ –±–æ–ª—å—à–µ –∏—Å–∫–æ–º–æ–≥–æ
             return 0;
 
         ListNode *current = head;
@@ -127,6 +127,28 @@ public:
 
         return 0;
     }
+    friend std::ostream &operator<<(std::ostream &os, const List &list)
+    {
+        if (!list.head)
+        {
+            os << "[]";
+            return os;
+        }
+
+        ListNode *current = list.head;
+        os << "[";
+
+        do
+        {
+            os << current->data;
+            current = current->next;
+            if (current != list.head)
+                os << ", ";
+        } while (current != list.head);
+
+        os << "]";
+        return os;
+    }
 };
 
 #include "DataManager.hpp"
@@ -138,12 +160,12 @@ struct Node
     Node *right = nullptr;
     Key key;
     List data;
-    bool red = true; // ÌÓ‚˚È ÛÁÂÎ ó Í‡ÒÌ˚È
+    bool red = true; // –Ω–æ–≤—ã–π —É–∑–µ–ª ‚Äî –∫—Ä–∞—Å–Ω—ã–π
 };
-// ------------------ Í‡ÒÌÓ-˜∏ÌÓÂ ‰ÂÂ‚Ó ----------------------
-// Ó·ıÓ‰ ÒÔ‡‚‡ Ì‡ÎÂ‚Ó
-// ÔË Û‰‡ÎÂÌËË Ï‡ÍÒËÏ‡Î¸Ì˚È ÒÔ‡‚‡
-// ÍÎ˛˜ ó ‰‡Ú‡ + ÙËÓ
+// ------------------ –∫—Ä–∞—Å–Ω–æ-—á—ë—Ä–Ω–æ–µ –¥–µ—Ä–µ–≤–æ ----------------------
+// –æ–±—Ö–æ–¥ —Å–ø—Ä–∞–≤–∞ –Ω–∞–ª–µ–≤–æ
+// –ø—Ä–∏ —É–¥–∞–ª–µ–Ω–∏–∏ –º–∞–∫—Å–∏–º–∞–ª—å–Ω—ã–π —Å–ø—Ä–∞–≤–∞
+// –∫–ª—é—á ‚Äî –¥–∞—Ç–∞ + —Ñ–∏–æ
 
 class RBtree : public IndexedStructure
 {
@@ -193,15 +215,15 @@ private:
 
     void insert_fixup(N *z)
     {
-        // ÔÓÍ‡ Ó‰ËÚÂÎ¸ Í‡ÒÌ˚È ó Ì‡Û¯ÂÌÓ Ò‚ÓÈÒÚ‚Ó
+        // –ø–æ–∫–∞ —Ä–æ–¥–∏—Ç–µ–ª—å –∫—Ä–∞—Å–Ω—ã–π ‚Äî –Ω–∞—Ä—É—à–µ–Ω–æ —Å–≤–æ–π—Å—Ç–≤–æ
         while (z->parent && z->parent->red)
         {
             if (z->parent == z->parent->parent->left)
             {
-                N *y = z->parent->parent->right; // ‰ˇ‰ˇ
+                N *y = z->parent->parent->right; // –¥—è–¥—è
                 if (is_red(y))
                 {
-                    // Case 1: ‰ˇ‰ˇ Í‡ÒÌ˚È
+                    // Case 1: –¥—è–¥—è –∫—Ä–∞—Å–Ω—ã–π
                     z->parent->red = false;
                     y->red = false;
                     z->parent->parent->red = true;
@@ -211,11 +233,11 @@ private:
                 {
                     if (z == z->parent->right)
                     {
-                        // Case 2: ÚÂÛ„ÓÎ¸ÌËÍ
+                        // Case 2: —Ç—Ä–µ—É–≥–æ–ª—å–Ω–∏–∫
                         z = z->parent;
                         rotate_left(z);
                     }
-                    // Case 3: ÎËÌËˇ
+                    // Case 3: –ª–∏–Ω–∏—è
                     z->parent->red = false;
                     z->parent->parent->red = true;
                     rotate_right(z->parent->parent);
@@ -223,7 +245,7 @@ private:
             }
             else
             {
-                // ÒËÏÏÂÚË˜ÌÓ
+                // —Å–∏–º–º–µ—Ç—Ä–∏—á–Ω–æ
                 N *y = z->parent->parent->left;
                 if (is_red(y))
                 {
@@ -245,16 +267,17 @@ private:
                 }
             }
         }
-        root->red = false; // ÍÓÂÌ¸ ‚ÒÂ„‰‡ ˜∏Ì˚È
+        root->red = false; // –∫–æ—Ä–µ–Ω—å –≤—Å–µ–≥–¥–∞ —á—ë—Ä–Ω—ã–π
     }
 
     N *BST_insert(const PersonalData &record)
     {
-        Key key = record.key;
+        Key key = record.key();
+        // std::cout << "inserting " << key << std::endl;
 
         N *y = nullptr;
         N *x = root;
-        // ‰ÓıÓ‰ËÏ ‰Ó ÏÂÒÚ‡ ‚ÒÚ‡‚ÍË
+        // –¥–æ—Ö–æ–¥–∏–º –¥–æ –º–µ—Å—Ç–∞ –≤—Å—Ç–∞–≤–∫–∏
         while (x)
         {
             y = x;
@@ -266,17 +289,17 @@ private:
                 break;
         }
         // std::cout << "traversed to insert place succsesfully\n";
-        // ÂÒÎË ÍÎ˛˜ ÛÊÂ ÂÒÚ¸, ÔÓÒÚÓ ‰Ó·‡‚ÎˇÂÏ ËÌ‰ÂÍÒ ‚ ÒÔËÒÓÍ
+        // –µ—Å–ª–∏ –∫–ª—é—á —É–∂–µ –µ—Å—Ç—å, –ø—Ä–æ—Å—Ç–æ –¥–æ–±–∞–≤–ª—è–µ–º –∏–Ω–¥–µ–∫—Å –≤ —Å–ø–∏—Å–æ–∫
         if (y == x and x)
         {
             x->data.add(record.array_index);
             return nullptr;
         }
-        // ËÌ‡˜Â ‚ÒÚ‡‚ÎˇÂÏ ÌÓ‚˚È ÛÁÂÎ
+        // –∏–Ω–∞—á–µ –≤—Å—Ç–∞–≤–ª—è–µ–º –Ω–æ–≤—ã–π —É–∑–µ–ª
         N *z = new N;
-        z->key = record.key;
+        z->key = record.key();
         z->data.add(record.array_index);
-
+        std::cout << z->data << std::endl;
         z->parent = y;
         if (!y)
             root = z;
@@ -298,7 +321,7 @@ private:
             else if (cur->key < key)
                 cur = cur->right;
             else
-                return cur; // ‡‚Ì˚
+                return cur; // —Ä–∞–≤–Ω—ã
         }
         return nullptr;
     }
@@ -408,6 +431,27 @@ private:
             x->red = false;
     }
 
+    // –æ–±—Ö–æ–¥ –¥–µ—Ä–µ–≤–∞ —Å–ø—Ä–∞–≤–∞ –Ω–∞–ª–µ–≤–æ
+    void print_ordered(N *node) const
+    {
+        if (!node)
+            return;
+        print_ordered(node->right);
+        std::cout << node->key << std::endl;
+        print_ordered(node->left);
+    }
+
+    // –ø–µ—á–∞—Ç—å —Å—Ç—Ä—É–∫—Ç—É—Ä—ã –¥–µ—Ä–µ–≤–∞
+    void print_structured(N *node, int indent = 0) const
+    {
+        if (node)
+        {
+            print_structured(node->right, indent + 4);
+            std::cout << std::string(indent, ' ') << (node->red ? "R" : "B") << ": " << node->key << " " << node->data << std::endl;
+            print_structured(node->left, indent + 4);
+        }
+    }
+
 public:
     RBtree() = default;
     ~RBtree()
@@ -433,6 +477,7 @@ public:
 
     void add(const PersonalData &record) override
     {
+        // std::cout << record << std::endl;
         N *z = BST_insert(record);
         if (z)
             insert_fixup(z);
@@ -446,15 +491,15 @@ public:
     void remove(const Key &key, const size_t &array_index) override
     {
         N *z = find_node(key);
-        // ÂÒÎË ÛÁÎ‡ Ò Ú‡ÍËÏ ÍÎ˛˜ÓÏ ÌÂÚ, ËÎË ÓÌ ÂÒÚ¸, ÌÓ ‚ Â„Ó ÒÔËÒÍÂ ÌÂÚ Ú‡ÍÓ„Ó ËÌ‰ÂÍÒ‡, ÚÓ Û‰‡ÎˇÚ¸ ÌÂ˜Â„Ó
+        // –µ—Å–ª–∏ —É–∑–ª–∞ —Å —Ç–∞–∫–∏–º –∫–ª—é—á–æ–º –Ω–µ—Ç, –∏–ª–∏ –æ–Ω –µ—Å—Ç—å, –Ω–æ –≤ –µ–≥–æ —Å–ø–∏—Å–∫–µ –Ω–µ—Ç —Ç–∞–∫–æ–≥–æ –∏–Ω–¥–µ–∫—Å–∞, —Ç–æ —É–¥–∞–ª—è—Ç—å –Ω–µ—á–µ–≥–æ
         if (!z)
             return;
-        // ÂÒÎË ÛÁÂÎ ÂÒÚ¸, ÌÓ ‚ Â„Ó ÒÔËÒÍÂ ÌÂÚ Ú‡ÍÓ„Ó ËÌ‰ÂÍÒ‡, ÚÓ Û‰‡ÎˇÚ¸ ÌÂ˜Â„Ó
+        // –µ—Å–ª–∏ —É–∑–µ–ª –µ—Å—Ç—å, –Ω–æ –≤ –µ–≥–æ —Å–ø–∏—Å–∫–µ –Ω–µ—Ç —Ç–∞–∫–æ–≥–æ –∏–Ω–¥–µ–∫—Å–∞, —Ç–æ —É–¥–∞–ª—è—Ç—å –Ω–µ—á–µ–≥–æ
         if (!(z->data.find_value(array_index)))
             return;
-        // Û‰‡ÎˇÂÏ ËÌ‰ÂÍÒ ËÁ ÒÔËÒÍ‡ ÛÁÎ‡
+        // —É–¥–∞–ª—è–µ–º –∏–Ω–¥–µ–∫—Å –∏–∑ —Å–ø–∏—Å–∫–∞ —É–∑–ª–∞
         z->data.remove(array_index);
-        //  ÂÒÎË ÔÓÒÎÂ Û‰‡ÎÂÌËˇ ÒÔËÒÓÍ ÛÁÎ‡ ÌÂ ÔÛÒÚ, ÚÓ Û‰‡ÎˇÚ¸ ÛÁÂÎ ÌÂ ÌÛÊÌÓ
+        //  –µ—Å–ª–∏ –ø–æ—Å–ª–µ —É–¥–∞–ª–µ–Ω–∏—è —Å–ø–∏—Å–æ–∫ —É–∑–ª–∞ –Ω–µ –ø—É—Å—Ç, —Ç–æ —É–¥–∞–ª—è—Ç—å —É–∑–µ–ª –Ω–µ –Ω—É–∂–Ω–æ
         if (!z->data.empty())
             return;
 
@@ -509,7 +554,7 @@ public:
 
     void update(const PersonalData &old_data, const PersonalData &new_data) override
     {
-        Key old_key = old_data.key;
+        Key old_key = old_data.key();
         N *n = find_node(old_key);
         if (!n)
             return;
@@ -520,30 +565,9 @@ public:
         add(new_data);
     }
 
-    // Ó·ıÓ‰ ‰ÂÂ‚‡ ÒÔ‡‚‡ Ì‡ÎÂ‚Ó
-    void print_in_order(N *node) const
+    void print_in_order() const
     {
-        if (!node)
-            return;
-        print_in_order(node->right);
-        std::cout << node->key << std::endl;
-        print_in_order(node->left);
-    }
-
-    void print() const
-    {
-        print_in_order(root);
-    }
-
-    // ÔÂ˜‡Ú¸ ÒÚÛÍÚÛ˚ ‰ÂÂ‚‡
-    void print_structured(N *node, int indent = 0) const
-    {
-        if (node)
-        {
-            print_structured(node->right, indent + 4);
-            std::cout << std::string(indent, ' ') << (node->red ? "R" : "B") << ": " << node->key << std::endl;
-            print_structured(node->left, indent + 4);
-        }
+        print_ordered(root);
     }
 
     void print_structure() const
@@ -573,7 +597,7 @@ public:
     {
         for (size_t index = 0; index < a_size; index++)
         {
-            if (array[index].key == key && array[index].array_index == array_index)
+            if (array[index].key() == key && array[index].array_index == array_index)
             {
                 array[index] = array[a_size - 1];
                 a_size--;

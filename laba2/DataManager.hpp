@@ -16,7 +16,7 @@ struct Date
     bool operator!=(const Date &o) const { return date_to_number(*this) != date_to_number(o); }
     friend std::ostream &operator<<(std::ostream &os, const Date &d)
     {
-        os << ((d.day < 10) ? "0" : "") << d.day << "." << ((d.month < 10) ? "0" : "")<< d.month << "." << d.year;
+        os << ((d.day < 10) ? "0" : "") << (unsigned short int)d.day << "." << ((d.month < 10) ? "0" : "")<< (unsigned short int)d.month << "." << (unsigned int)d.year;
         return os;
     }
 };
@@ -98,19 +98,19 @@ struct PersonalData
     FIO full_name;
     size_t request_number;
     std::string description;
-    Key key = Key{date, full_name};
+    Key key() const { return Key{Date{date.day, date.month, date.year}, FIO{full_name.surname, full_name.name, full_name.patronymic}}; }
 
     size_t array_index;
 
-    bool operator<(const PersonalData &o) const { return (key < o.key); }
-    bool operator>(const PersonalData &o) const { return (key > o.key); }
+    bool operator<(const PersonalData &o) const { return (key() < o.key()); }
+    bool operator>(const PersonalData &o) const { return (key() > o.key()); }
     bool operator==(const PersonalData &o) const
     {
         return (date == o.date) && (full_name == o.full_name) && (request_number == o.request_number) && (description == o.description);
     }
     friend std::ostream &operator<<(std::ostream &os, const PersonalData &pd)
     {
-        os << pd.date << " | " << pd.full_name << " | " << pd.request_number << " | " << pd.description;
+        os << pd.date << " | " << pd.full_name << " | " << (size_t)pd.request_number << " | " << pd.description;
         return os;
     }
 };

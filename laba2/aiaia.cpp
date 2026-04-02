@@ -80,7 +80,7 @@ void read_data_from_file(const std::string &filename, DataManager &manager)
 int main()
 {
     setlocale(LC_ALL, "rus");
-    
+    /*
     RBtree tree;
     Array array;
     DataManager manager(tree, array);
@@ -91,6 +91,43 @@ int main()
 
     // manager.get_indexed_structure().print_structure();
     manager.get_data_bank().print_repository();
-    
+    */
+
+    RBtree tree;
+    PersonalData pd;
+    pd.date = {1, 0, 0};
+    pd.array_index = 1;
+    pd.request_number = 1;
+    pd.description = "bebebe";
+    pd.full_name.name = "a";
+    pd.full_name.surname = "a";
+    pd.full_name.patronymic = "a";
+    std::cout << pd << std::endl;
+    std::cout << pd.key() << std::endl;
+
+    tree.add(pd);
+    pd.date = {1, 1, 0};
+    pd.full_name.name = "aa";
+    tree.add(pd);
+    pd.date = {1, 1, 1};
+    tree.add(pd);
+    pd.date = {1, 1, 1};
+    pd.full_name.name = "aaa";
+    tree.add(pd);
+    pd.date = {1, 1, 1};
+    tree.add(pd);
+    pd.date = {1, 2, 1};
+    tree.add(pd);
+    pd.date = {1, 2, 1};
+    pd.full_name.name = "asa";
+    tree.add(pd);
+    pd.date = {1, 1, 3};
+    tree.add(pd);
+    pd.date = {3, 1, 1};
+    tree.add(pd);
+
+    tree.print_structure();
+    tree.print_in_order();
+
     return 0;
 }
