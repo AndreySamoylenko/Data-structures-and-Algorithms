@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <locale>
 
 bool string_to_date(const std::string &date_str, Date &date)
 {
@@ -69,20 +70,27 @@ void read_data_from_file(const std::string &filename, DataManager &manager)
         line = line.substr(line.find('|') + 1);
         // Остаток строки - описание
         record.description = line;
-
         manager.add(record);
+        // std::cout << record << std::endl;
+
         index++;
     }
 }
 
 int main()
-{   
+{
+    setlocale(LC_ALL, "rus");
+    
     RBtree tree;
     Array array;
     DataManager manager(tree, array);
-    read_data_from_file("input.txt", manager);
-    manager.get_indexed_structure().print_structure();
-    manager.get_data_bank().print_repository();
+    std::cout << "Manager created\n";
 
+    read_data_from_file("input.txt", manager);
+    std::cout << "Date read succsefully\n";
+
+    // manager.get_indexed_structure().print_structure();
+    manager.get_data_bank().print_repository();
+    
     return 0;
 }

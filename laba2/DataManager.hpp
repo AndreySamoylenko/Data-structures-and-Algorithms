@@ -3,7 +3,6 @@
 #include <string>
 #include <iostream>
 
-
 struct Date
 {
     unsigned short int day;
@@ -17,7 +16,7 @@ struct Date
     bool operator!=(const Date &o) const { return date_to_number(*this) != date_to_number(o); }
     friend std::ostream &operator<<(std::ostream &os, const Date &d)
     {
-        os << d.day << "." << d.month << "." << d.year;
+        os << ((d.day < 10) ? "0" : "") << d.day << "." << ((d.month < 10) ? "0" : "")<< d.month << "." << d.year;
         return os;
     }
 };
@@ -56,7 +55,6 @@ struct FIO
         os << f.surname << " " << f.name << " " << f.patronymic;
         return os;
     }
-
 };
 
 struct Key
@@ -146,7 +144,7 @@ public:
 
     void add(PersonalData &record)
     {
-        indexed_struct.add(record);
+        // indexed_struct.add(record);
         data_bank.add(record);
     };
 

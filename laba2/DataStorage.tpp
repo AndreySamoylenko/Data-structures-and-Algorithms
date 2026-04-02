@@ -7,18 +7,17 @@
 
 // ------------------ двусвязный сортированный список ----------------------
 
-
-struct list_node
+struct ListNode
 {
     size_t data;
-    list_node *next;
-    list_node *previous;
+    ListNode *next;
+    ListNode *previous;
 };
 
 class List
 {
 private:
-    list_node *head;
+    ListNode *head = nullptr;
 
 public:
     List() {}
@@ -27,14 +26,14 @@ public:
         if (!head)
             return;
 
-        head->previous->next = nullptr; // разорвали закольцованность
-        while (head->next)
+        ListNode *current = head->next;
+
+        while (current != head)
         {
-            head->previous = nullptr;
-            head = head->next;
-            delete head->previous;
+            ListNode *temp = current;
+            current = current->next;
+            delete temp;
         }
-        head->previous = nullptr;
 
         delete head;
     }
@@ -43,36 +42,49 @@ public:
 
     void add(size_t data)
     {
-        list_node *new_Node = new list_node;
-        new_Node->data = data;
-
-        if (!head) // если добавленный элемент первый в списке
+        ListNode *new_node = new ListNode;
+        new_node->data = data;
+        new_node->next = nullptr;
+        new_node->previous = nullptr;
+        // std::cout << "adding " << data << " to list\n";
+        // std::cout << (head ? "list is not empty\n" : "list is empty\n");
+        if (!head)
         {
-            new_Node->next = new_Node;
-            new_Node->previous = new_Node;
-            head = new_Node;
+            new_node->next = new_node;
+            new_node->previous = new_node;
+            head = new_node;
             return;
         }
 
-        list_node *current = head;
-        if (data >= current->data)
-            head = new_Node;
+        ListNode *current = head;
 
+        // ищем место вставки
         do
-            current = current->next;
-        while (data < current->data and current != head);
+        {
+            if (data >= current->data)
+                break;
 
-        current->previous->next = new_Node;
-        new_Node->previous = current->previous;
-        current->previous = new_Node;
-        new_Node->next = current;
+            current = current->next;
+        } while (current != head);
+
+        // вставка перед current
+        new_node->next = current;
+        new_node->previous = current->previous;
+        current->previous->next = new_node;
+        current->previous = new_node;
+
+        // если вставили перед head ? обновляем head
+        if (current == head && data >= current->data)
+        {
+            head = new_node;
+        }
     }
     void remove(size_t data)
     {
         if (!head)
             return;
 
-        list_node *true_first = head;
+        ListNode *true_first = head;
 
         do
         {
@@ -80,7 +92,7 @@ public:
             {
                 head->previous->next = head->next;
                 head = head->next;
-                list_node *buffer = head->previous->previous;
+                ListNode *buffer = head->previous->previous;
                 delete head->previous;
                 head->previous = buffer;
             }
@@ -105,7 +117,7 @@ public:
         if (head->previous->data > value) // если все значения списка больше искомого
             return 0;
 
-        list_node *current = head;
+        ListNode *current = head;
         do
         {
             if (current->data == value)
@@ -119,15 +131,13 @@ public:
 
 #include "DataManager.hpp"
 
-template <class T>
 struct Node
 {
     Node *parent = nullptr;
     Node *left = nullptr;
     Node *right = nullptr;
-    PersonalData p_data;
     Key key;
-    T data;
+    List data;
     bool red = true; // новый узел — красный
 };
 // ------------------ красно-чёрное дерево ----------------------
@@ -138,7 +148,7 @@ struct Node
 class RBtree : public IndexedStructure
 {
 private:
-    using N = Node<List *>;
+    using N = Node;
     N *root = nullptr;
 
     bool is_red(N *x) const { return x && x->red; }
@@ -255,16 +265,17 @@ private:
             else
                 break;
         }
+        // std::cout << "traversed to insert place succsesfully\n";
         // если ключ уже есть, просто добавляем индекс в список
-        if (y == x)
+        if (y == x and x)
         {
-            x->data->add(record.array_index);
-            return root;
+            x->data.add(record.array_index);
+            return nullptr;
         }
         // иначе вставляем новый узел
-        N *z = new N{};
+        N *z = new N;
         z->key = record.key;
-        z->data->add(record.array_index);
+        z->data.add(record.array_index);
 
         z->parent = y;
         if (!y)
@@ -427,7 +438,7 @@ public:
             insert_fixup(z);
     }
 
-    List *find(const Key &key) const
+    List find(const Key &key) const
     {
         return (find_node(key)->data);
     }
@@ -439,12 +450,12 @@ public:
         if (!z)
             return;
         // если узел есть, но в его списке нет такого индекса, то удалять нечего
-        if (!(z->data->find_value(array_index)))
+        if (!(z->data.find_value(array_index)))
             return;
         // удаляем индекс из списка узла
-        z->data->remove(array_index);
+        z->data.remove(array_index);
         //  если после удаления список узла не пуст, то удалять узел не нужно
-        if (!z->data->empty())
+        if (!z->data.empty())
             return;
 
         N *y = z;
@@ -502,7 +513,7 @@ public:
         N *n = find_node(old_key);
         if (!n)
             return;
-        if (!(n->data->find_value(old_data.array_index)))
+        if (!(n->data.find_value(old_data.array_index)))
             return;
 
         remove(old_key, old_data.array_index);
@@ -539,7 +550,6 @@ public:
     {
         print_structured(root);
     }
-
 };
 
 class Array : public Repository
