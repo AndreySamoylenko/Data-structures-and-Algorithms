@@ -108,10 +108,10 @@ int main()
     tree.add(pd);
     tree.add(pd);
     tree.add(pd);
-    tree.print_structure();
 
-    // pd.date = {1, 1, 0};
-    // tree.add(pd);
+    pd.date = {1, 1, 0};
+    tree.add(pd);
+    tree.print_structure();
 
 
     // pd.full_name.name = "aa";

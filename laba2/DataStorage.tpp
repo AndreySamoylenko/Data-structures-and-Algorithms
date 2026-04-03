@@ -281,17 +281,22 @@ private:
         while (x)
         {
             y = x;
-            std::cout << "traversing " << x->key << std::endl;
+            std::cout << "traversing " << ((x->key < key) ? "right" : "left") << std::endl;
             if (key < x->key)
+            {
                 x = x->left;
-            else if (key < x->key)
+            }
+            else if (key > x->key)
+            {
                 x = x->right;
+            }
             else if (x->key == key)
             { // если ключ уже есть, то просто добавляем индекс в список узла
                 std::cout << "adding index to existing key " << key << std::endl;
                 x->data.add(record.array_index);
                 return nullptr;
             }
+            std::cin;
         }
         std::cout << "traversed to insert place succsesfully\n";
 
