@@ -67,7 +67,7 @@ void read_data_from_file(const std::string &filename, DataManager &manager)
         {
             std::cerr << "Error parsing request number in line: " << index + 1 << ": " << line << std::endl;
         }
-        line = line.substr(line.find('|') + 1);
+        line = line.substr(line.find('|') + 2);
         // Остаток строки - описание
         record.description = line;
         record.array_index = index;
@@ -117,7 +117,15 @@ int main()
     std::cout << std::endl;
     std::cout << std::endl;
 
+    pd = {Date{1, 1, 2020}, FIO{"Петров", "Петр", "Петрович"}, 1001, "ффф"};
+    manager.remove(pd);
 
+
+    manager.get_data_bank().print_repository();
+    std::cout << std::endl;
+    static_cast<RBtree &>(manager.get_indexed_structure()).print_in_order();
+    std::cout << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

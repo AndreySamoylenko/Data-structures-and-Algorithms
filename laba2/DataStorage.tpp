@@ -7,7 +7,7 @@
 
 // ------------------ двусвязный сортированный список ----------------------
 
-class List
+class List // кольцевой двусвязный список, отсортированный по убыванию
 {
 private:
     struct ListNode
@@ -24,17 +24,13 @@ public:
     {
         if (!head)
             return;
-
-        ListNode *current = head->next;
-
-        while (current != head)
+        ListNode *current = head;
+        do
         {
-            ListNode *temp = current;
-            current = current->next;
-            delete temp;
-        }
-
-        delete head;
+            ListNode *next = current->next;
+            delete current;
+            current = next;
+        } while (current != head);
     }
 
     bool empty() const { return head == nullptr; }
@@ -48,8 +44,7 @@ public:
         new_node->data = data;
         new_node->next = nullptr;
         new_node->previous = nullptr;
-        // std::cout << "adding " << data << " to list\n";
-        // std::cout << (head ? "list is not empty\n" : "list is empty\n");
+
         if (!head)
         {
             new_node->next = new_node;
@@ -81,6 +76,7 @@ public:
             head = new_node;
         }
     }
+
     void remove(size_t data)
     {
         if (!head)
@@ -104,42 +100,38 @@ public:
                 current = current->next;
                 temp->previous->next = current;
                 current->previous = temp->previous;
-                if(temp == head) // если удаляемый элемент — head, то обновляем head
+                if (temp == head) // если удаляемый элемент — head, то обновляем head
                 {
                     head = current;
                 }
                 delete temp;
-                break;
+                return;
             }
             else
                 current = current->next;
         } while (current != head);
-
-        if (current == current->next and current->data == data)
-        {
-            head = nullptr;
-            delete current;
-        }
     }
-    bool find_value(size_t value)
+
+    bool find_value(const size_t value) const
     {
         if (!head) // если список пуст
-            return 0;
+            return false;
         if (head->data < value) // если все значения списка меньше искомого
-            return 0;
+            return false;
         if (head->previous->data > value) // если все значения списка больше искомого
-            return 0;
+            return false;
 
         ListNode *current = head;
         do
         {
             if (current->data == value)
-                return 1;
+                return true;
             current = current->next;
         } while (current != head);
 
-        return 0;
+        return false;
     }
+
     friend std::ostream &operator<<(std::ostream &os, const List &list)
     {
         if (!list.head)
@@ -310,7 +302,6 @@ private:
                 x->data.add(record.array_index);
                 return nullptr;
             }
-            std::cin;
         }
         // std::cout << "traversed to insert place succsesfully\n";
 
@@ -515,7 +506,10 @@ public:
 
     List find(const Key &key) const
     {
-        return (find_node(key)->data);
+        N *node = find_node(key);
+        if (!node)
+            return List(); // Вернуть пустой список
+        return node->data;
     }
 
     void remove(const PersonalData &record) override
@@ -584,17 +578,17 @@ public:
         }
     }
 
-    void update(const PersonalData &old_data, const PersonalData &new_data) override
+    void update_index(const PersonalData &record, const size_t &new_index) override
     {
-        Key old_key = old_data.key();
-        N *n = find_node(old_key);
+        Key key_ = record.key();
+        N *n = find_node(key_);
         if (!n)
             return;
-        if (!(n->data.find_value(old_data.array_index)))
+        if (!(n->data.find_value(record.array_index)))
             return;
 
-        add(new_data);
-        remove(old_data);
+        n->data.remove(record.array_index);
+        n->data.add(new_index);
     }
 
     void print_in_order() const
@@ -640,18 +634,20 @@ public:
             }
         }
     }
-    void update(const PersonalData &old_data, const PersonalData &new_data)
+    void update(const PersonalData &old_data, const PersonalData &new_data) override
     {
         for (size_t index = 0; index < a_size; index++)
         {
             if (array[index] == old_data)
             {
-                array[index] = new_data;
+                PersonalData updated_record = new_data;
+                updated_record.array_index = array[index].array_index; 
+                array[index] = updated_record;
                 return;
             }
         }
     }
-    PersonalData get(const size_t &array_index) const
+    PersonalData get(const size_t &array_index) const override
     {
         if (array_index >= a_size)
         {
@@ -660,7 +656,7 @@ public:
         }
         return array[array_index];
     }
-    long long find(const PersonalData &record) const
+    long long find(const PersonalData &record) const override
     {
         for (size_t index = 0; index < a_size; index++)
         {
@@ -671,8 +667,9 @@ public:
         }
         return -1; // если запись не найдена, возвращаем -1
     }
-    long long size() const { return a_size; }
-    void print_repository() const
+    long long size() const override { return a_size; }
+
+    void print_repository() const override
     {
         for (size_t index = 0; index < a_size; index++)
         {
