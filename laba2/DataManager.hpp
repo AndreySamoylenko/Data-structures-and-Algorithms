@@ -141,7 +141,7 @@ public:
     virtual void add(const PersonalData &record) = 0;
     virtual void remove(const PersonalData &record) = 0;
     virtual void update_index(const PersonalData &record, const size_t &new_index) = 0;
-    virtual List find(const Key &key) const = 0;
+    // virtual List find(const Key &key) const = 0;
     virtual void print_structure() const = 0;
 };
 
