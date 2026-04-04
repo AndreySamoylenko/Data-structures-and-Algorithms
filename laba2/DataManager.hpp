@@ -150,7 +150,7 @@ public:
 
     void add(PersonalData &record)
     {
-        // indexed_struct.add(record);
+        indexed_struct.add(record);
         data_bank.add(record);
     };
 
