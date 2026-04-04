@@ -113,25 +113,22 @@ public:
 void DataManager::remove(const Key &key)
 {
     size_t index = indexed_struct.remove(key);
-    
 }
-
-// #include <functional>
-
-template <class T>
-struct Node
-{
-    Node *parent = nullptr;
-    Node *left = nullptr;
-    Node *right = nullptr;
-    Key key;
-    T data;
-    bool red = true; // новый узел Ч красный
-};
 
 class RBtree : public IndexedStructure
 {
 private:
+    template <class T>
+    struct Node
+    {
+        Node *parent = nullptr;
+        Node *left = nullptr;
+        Node *right = nullptr;
+        Key key;
+        T data;
+        bool red = true; // новый узел Ч красный
+    };
+
     using N = Node<List *>;
     N *root = nullptr;
 
