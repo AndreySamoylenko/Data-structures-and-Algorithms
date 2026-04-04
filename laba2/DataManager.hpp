@@ -98,8 +98,7 @@ struct PersonalData
     FIO full_name;
     size_t request_number;
     std::string description;
-
-    size_t array_index;
+    size_t array_index; // индекс в массиве, который хранит все данные
 
     bool operator<(const PersonalData &o) const { return (key() < o.key()); }
     bool operator>(const PersonalData &o) const { return (key() > o.key()); }
@@ -125,8 +124,11 @@ class Repository
 {
 public:
     virtual void add(PersonalData &record) = 0;
-    virtual void remove(const Key &key, const size_t &array_index) = 0;
+    virtual void remove(const PersonalData &record) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
+    virtual PersonalData get(const size_t &array_index) const = 0;
+    virtual long long find(const PersonalData &record) const = 0;
+    virtual long long size() const = 0;
     virtual void print_repository() const = 0;
 };
 
@@ -134,7 +136,7 @@ class IndexedStructure
 {
 public:
     virtual void add(const PersonalData &record) = 0;
-    virtual void remove(const Key &key, const size_t &array_index) = 0;
+    virtual void remove(const PersonalData &record) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
     virtual void print_structure() const = 0;
 };
@@ -150,14 +152,30 @@ public:
 
     void add(PersonalData &record)
     {
-        indexed_struct.add(record);
-        data_bank.add(record);
+        data_bank.add(record);      // добавляем запись в массив (внутри метода add массива уже выставляется правильный array_index)
+        indexed_struct.add(record); // добавляем запись с правильным индексом в дерево
     };
 
-    void remove(const Key &key, const size_t &array_index)
+    void remove(const PersonalData &record)
     {
-        indexed_struct.remove(key, array_index);
-        data_bank.remove(key, array_index);
+        long long array_index = data_bank.find(record);
+
+        if (array_index == -1) // если записи нет в массиве, то удалять нечего
+            return;
+
+        PersonalData last_record = data_bank.get(data_bank.size() - 1);
+        data_bank.remove(record); // затерли данные в массиве (теперь на месте удалённой записи стоит последняя запись массива)
+
+        if (array_index == data_bank.size()) // если удалённая запись была последней в массиве
+        {   // то обновлять индекс в дереве не нужно, так как на её месте уже стоит последняя запись массива с правильным индексом, просто удалим её из дерева
+            indexed_struct.remove(record); // удалили из дерева запись
+            return;
+        }
+
+        indexed_struct.remove(record);                         // удалили из дерева запись
+        indexed_struct.add(last_record);                       // передобавили в дерево запись (которая теперь стоит на месте удалённой записи) с новым индексом
+        last_record.array_index = data_bank.size() - 1;
+        indexed_struct.remove(last_record); // удалили из дерева последнюю запись со старым индексом
     };
 
     void update(const PersonalData &old_data, const PersonalData &new_data)

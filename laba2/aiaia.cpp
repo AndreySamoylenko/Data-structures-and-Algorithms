@@ -85,14 +85,38 @@ int main()
     RBtree tree;
     Array array;
     DataManager manager(tree, array);
-    std::cout << "Manager created\n";
+    // std::cout << "Manager created\n";
 
     read_data_from_file("input.txt", manager);
-    std::cout << "Date read succsefully\n";
+    // std::cout << "Date read succsefully\n";
 
     manager.get_data_bank().print_repository();
+    std::cout << std::endl;
+    static_cast<RBtree &>(manager.get_indexed_structure()).print_in_order();
+    std::cout << std::endl;
+    std::cout << std::endl;
 
-    manager.get_indexed_structure().print_structure();
+
+
+    PersonalData pd = {Date{1, 1, 2020}, FIO{"Петров", "Петр", "Петрович"}, 1, "Новая заявка"};
+    manager.add(pd);
+
+    manager.get_data_bank().print_repository();
+    std::cout << std::endl;
+    static_cast<RBtree &>(manager.get_indexed_structure()).print_in_order();
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    
+    manager.remove(pd);
+
+
+    manager.get_data_bank().print_repository();
+    std::cout << std::endl;
+    static_cast<RBtree &>(manager.get_indexed_structure()).print_in_order();
+    std::cout << std::endl;
+    std::cout << std::endl;
+
 
 
     return 0;
