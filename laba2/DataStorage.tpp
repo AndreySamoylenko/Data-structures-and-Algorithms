@@ -7,7 +7,7 @@
 
 // ------------------ двусвязный сортированный список ----------------------
 
-class List
+class List // РєРѕР»СЊС†РµРІРѕР№ РґРІСѓСЃРІСЏР·РЅС‹Р№ СЃРїРёСЃРѕРє, РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРЅС‹Р№ РїРѕ СѓР±С‹РІР°РЅРёСЋ
 {
 private:
     struct ListNode
@@ -16,7 +16,6 @@ private:
         ListNode *next;
         ListNode *previous;
     };
-
     ListNode *head = nullptr;
 
 public:
@@ -25,29 +24,27 @@ public:
     {
         if (!head)
             return;
-
-        ListNode *current = head->next;
-
-        while (current != head)
+        ListNode *current = head;
+        do
         {
-            ListNode *temp = current;
-            current = current->next;
-            delete temp;
-        }
-
-        delete head;
+            ListNode *next = current->next;
+            delete current;
+            current = next;
+        } while (current != head);
     }
 
     bool empty() const { return head == nullptr; }
 
     void add(size_t data)
     {
+        if (find_value(data)) // РµСЃР»Рё Р·РЅР°С‡РµРЅРёРµ СѓР¶Рµ РµСЃС‚СЊ, С‚Рѕ РЅРµ РґРѕР±Р°РІР»СЏРµРј РµРіРѕ СЃРЅРѕРІР°
+            return;
+
         ListNode *new_node = new ListNode;
         new_node->data = data;
         new_node->next = nullptr;
         new_node->previous = nullptr;
-        // std::cout << "adding " << data << " to list\n";
-        // std::cout << (head ? "list is not empty\n" : "list is empty\n");
+
         if (!head)
         {
             new_node->next = new_node;
@@ -73,60 +70,68 @@ public:
         current->previous->next = new_node;
         current->previous = new_node;
 
-        // если вставили перед head → обновляем head
+        // РµСЃР»Рё РІСЃС‚Р°РІРёР»Рё РїРµСЂРµРґ head С‚РѕРіРґР° РѕР±РЅРѕРІР»СЏРµРј head
         if (current == head && data >= current->data)
         {
             head = new_node;
         }
     }
+
     void remove(size_t data)
     {
         if (!head)
             return;
+        if (!find_value(data)) // РµСЃР»Рё Р·РЅР°С‡РµРЅРёСЏ РЅРµС‚, С‚Рѕ СѓРґР°Р»СЏС‚СЊ РЅРµС‡РµРіРѕ
+            return;
+        if (head->next == head) // РµСЃР»Рё РІ СЃРїРёСЃРєРµ С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЌР»РµРјРµРЅС‚
+        {
+            delete head;
+            head = nullptr;
+            return;
+        }
 
-        ListNode *true_first = head;
+        ListNode *current = head;
 
         do
         {
-            if (head->data == data && head != head->next)
+            if (current->data == data)
             {
-                head->previous->next = head->next;
-                head = head->next;
-                ListNode *buffer = head->previous->previous;
-                delete head->previous;
-                head->previous = buffer;
+                ListNode *temp = current;
+                current = current->next;
+                temp->previous->next = current;
+                current->previous = temp->previous;
+                if (temp == head) // РµСЃР»Рё СѓРґР°Р»СЏРµРјС‹Р№ СЌР»РµРјРµРЅС‚ вЂ” head, С‚Рѕ РѕР±РЅРѕРІР»СЏРµРј head
+                {
+                    head = current;
+                }
+                delete temp;
+                return;
             }
             else
-                head = head->next;
-        } while (head != true_first);
-
-        if (head == head->next and head->data == data)
-        {
-            true_first = nullptr;
-            delete head;
-        }
-
-        head = true_first;
+                current = current->next;
+        } while (current != head);
     }
-    bool find_value(size_t value)
+
+    bool find_value(const size_t value) const
     {
-        if (!head) // если список пуст
-            return 0;
-        if (head->data < value) // если все значения списка меньше искомого
-            return 0;
-        if (head->previous->data > value) // если все значения списка больше искомого
-            return 0;
+        if (!head) // РµСЃР»Рё СЃРїРёСЃРѕРє РїСѓСЃС‚
+            return false;
+        if (head->data < value) // РµСЃР»Рё РІСЃРµ Р·РЅР°С‡РµРЅРёСЏ СЃРїРёСЃРєР° РјРµРЅСЊС€Рµ РёСЃРєРѕРјРѕРіРѕ
+            return false;
+        if (head->previous->data > value) // РµСЃР»Рё РІСЃРµ Р·РЅР°С‡РµРЅРёСЏ СЃРїРёСЃРєР° Р±РѕР»СЊС€Рµ РёСЃРєРѕРјРѕРіРѕ
+            return false;
 
         ListNode *current = head;
         do
         {
             if (current->data == value)
-                return 1;
+                return true;
             current = current->next;
         } while (current != head);
 
-        return 0;
+        return false;
     }
+
     friend std::ostream &operator<<(std::ostream &os, const List &list)
     {
         if (!list.head)
@@ -153,40 +158,25 @@ public:
 
 #include "DataManager.hpp"
 
-struct Node
-{
-    Node *parent = nullptr;
-    Node *left = nullptr;
-    Node *right = nullptr;
-    Key key;
-    List data;
-    bool red = true; // новый узел — красный
-};
-// ------------------ красно-чёрное дерево ----------------------
-// обход справа налево
-// при удалении максимальный справа
-// ключ — дата + фио
->>>>>>> d8ce3768d2a7efd10c1625c3e5022ec3f8b6fc27
+// ------------------ РєСЂР°СЃРЅРѕ-С‡С‘СЂРЅРѕРµ РґРµСЂРµРІРѕ ----------------------
+// РѕР±С…РѕРґ СЃРїСЂР°РІР° РЅР°Р»РµРІРѕ
+// РїСЂРё СѓРґР°Р»РµРЅРёРё РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЃРїСЂР°РІР°
+// РєР»СЋС‡ вЂ” РґР°С‚Р° + С„РёРѕ
 
 class RBtree : public IndexedStructure
 {
 private:
-<<<<<<< HEAD
-    template <class T>
     struct Node
     {
         Node *parent = nullptr;
         Node *left = nullptr;
         Node *right = nullptr;
         Key key;
-        T data;
-        bool red = true; // ����� ���� � �������
+        List data;
+        bool red = true; // РЅРѕРІС‹Р№ СѓР·РµР» вЂ” РєСЂР°СЃРЅС‹Р№
     };
 
-    using N = Node<List *>;
-    == == == =
-                 using N = Node;
->>>>>>> d8ce3768d2a7efd10c1625c3e5022ec3f8b6fc27
+    using N = Node;
     N *root = nullptr;
 
     bool is_red(N *x) const { return x && x->red; }
@@ -289,7 +279,7 @@ private:
     N *BST_insert(const PersonalData &record)
     {
         Key key = record.key();
-        std::cout << "inserting " << key << std::endl;
+        // std::cout << "inserting " << key << std::endl;
 
         N *y = nullptr;
         N *x = root;
@@ -297,7 +287,7 @@ private:
         while (x)
         {
             y = x;
-            std::cout << "traversing " << ((x->key < key) ? "right" : "left") << std::endl;
+            // std::cout << "traversing " << ((x->key < key) ? "right" : "left") << std::endl;
             if (key < x->key)
             {
                 x = x->left;
@@ -316,22 +306,20 @@ private:
                 == == == =
             }
             else if (x->key == key)
-            { // если ключ уже есть, то просто добавляем индекс в список узла
-                std::cout << "adding index to existing key " << key << std::endl;
+            { // РµСЃР»Рё РєР»СЋС‡ СѓР¶Рµ РµСЃС‚СЊ, С‚Рѕ РїСЂРѕСЃС‚Рѕ РґРѕР±Р°РІР»СЏРµРј РёРЅРґРµРєСЃ РІ СЃРїРёСЃРѕРє СѓР·Р»Р°
+                // std::cout << "adding index to existing key " << key << std::endl;
                 x->data.add(record.array_index);
                 return nullptr;
             }
-            std::cin;
->>>>>>> d8ce3768d2a7efd10c1625c3e5022ec3f8b6fc27
         }
-        std::cout << "traversed to insert place succsesfully\n";
+        // std::cout << "traversed to insert place succsesfully\n";
 
         // вставляем новый узел
         N *z = new N;
         z->key = record.key();
         z->data.add(record.array_index);
 
-        std::cout << z->data << std::endl;
+        // std::cout << z->data << std::endl;
         z->parent = y;
         if (!y)
             root = z;
@@ -468,12 +456,13 @@ private:
     {
         if (!node)
         {
-            std::cout << "null\n";
+            // std::cout << "null\n";
+            return;
         }
         else
         {
             print_ordered(node->right);
-            std::cout << node->key << std::endl;
+            std::cout << node->key << " " << node->data << std::endl;
             print_ordered(node->left);
         }
     }
@@ -526,21 +515,26 @@ public:
 
     List find(const Key &key) const
     {
-        return (find_node(key)->data);
+        N *node = find_node(key);
+        if (!node)
+            return List(); // Р’РµСЂРЅСѓС‚СЊ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє
+        return node->data;
     }
 
-    void remove(const Key &key, const size_t &array_index) override
+    void remove(const PersonalData &record) override
     {
-        N *z = find_node(key);
-        // если узла с таким ключом нет, или он есть, но в его списке нет такого индекса, то удалять нечего
+
+        N *z = find_node(record.key());
+        // РµСЃР»Рё СѓР·Р»Р° СЃ С‚Р°РєРёРј РєР»СЋС‡РѕРј РЅРµС‚, С‚Рѕ СѓРґР°Р»СЏС‚СЊ РЅРµС‡РµРіРѕ
         if (!z)
             return;
-        // если узел есть, но в его списке нет такого индекса, то удалять нечего
-        if (!(z->data.find_value(array_index)))
+
+        // РµСЃР»Рё СѓР·РµР» РµСЃС‚СЊ, РЅРѕ РІ РµРіРѕ СЃРїРёСЃРєРµ РЅРµС‚ С‚Р°РєРѕРіРѕ РёРЅРґРµРєСЃР°, С‚Рѕ СѓРґР°Р»СЏС‚СЊ РЅРµС‡РµРіРѕ
+        if (!(z->data.find_value(record.array_index)))
             return;
-        // удаляем индекс из списка узла
-        z->data.remove(array_index);
-        //  если после удаления список узла не пуст, то удалять узел не нужно
+        // СѓРґР°Р»СЏРµРј РёРЅРґРµРєСЃ РёР· СЃРїРёСЃРєР° СѓР·Р»Р°
+        z->data.remove(record.array_index);
+        //  РµСЃР»Рё РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ СЃРїРёСЃРѕРє СѓР·Р»Р° РЅРµ РїСѓСЃС‚, С‚Рѕ СѓРґР°Р»СЏС‚СЊ СѓР·РµР» РЅРµ РЅСѓР¶РЅРѕ
         if (!z->data.empty())
             return;
 
@@ -593,17 +587,17 @@ public:
         }
     }
 
-    void update(const PersonalData &old_data, const PersonalData &new_data) override
+    void update_index(const PersonalData &record, const size_t &new_index) override
     {
-        Key old_key = old_data.key();
-        N *n = find_node(old_key);
+        Key key_ = record.key();
+        N *n = find_node(key_);
         if (!n)
             return;
-        if (!(n->data.find_value(old_data.array_index)))
+        if (!(n->data.find_value(record.array_index)))
             return;
 
-        remove(old_key, old_data.array_index);
-        add(new_data);
+        n->data.remove(record.array_index);
+        n->data.add(new_index);
     }
 
     void print_in_order() const
@@ -628,50 +622,67 @@ public:
     void add(PersonalData &record) override
     {
         if (a_size == a_capacity)
+        {
+            std::cout << "Array is full, cannot add more records.\n";
             return;
+        }
 
         record.array_index = a_size;
         array[a_size] = record;
         a_size++;
     }
-    void remove(const Key &key, const size_t &array_index) override
+    void remove(const PersonalData &record) override
     {
-<<<<<<< HEAD
-        for (int index = 0; index < a_size; index++)
+        for (size_t index = 0; index < a_size; index++)
         {
-            if (array[index].key == key)
-                == == == =
-                             for (size_t index = 0; index < a_size; index++)
-                {
-                    if (array[index].key() == key && array[index].array_index == array_index)
->>>>>>> d8ce3768d2a7efd10c1625c3e5022ec3f8b6fc27
-                    {
-                        array[index] = array[a_size - 1];
-                        a_size--;
-                        return;
-                    }
-                }
-        }
-        void update(const PersonalData &old_data, const PersonalData &new_data)
-        {
-<<<<<<< HEAD
-            for (int index = 0; index < a_size; index++)
-                == == == =
-                             for (size_t index = 0; index < a_size; index++)
->>>>>>> d8ce3768d2a7efd10c1625c3e5022ec3f8b6fc27
-                {
-                    if (array[index] == old_data)
-                    {
-                        array[index] = new_data;
-                        return;
-                    }
-                }
-        }
-        void print_repository() const
-        {
-            for (size_t index = 0; index < a_size; index++)
+            if (array[index] == record)
             {
-                std::cout << array[index] << std::endl;
+                array[index] = array[a_size - 1];
+                a_size--;
+                return;
             }
         }
-    };
+    }
+    void update(const PersonalData &old_data, const PersonalData &new_data) override
+    {
+        for (size_t index = 0; index < a_size; index++)
+        {
+            if (array[index] == old_data)
+            {
+                PersonalData updated_record = new_data;
+                updated_record.array_index = array[index].array_index; 
+                array[index] = updated_record;
+                return;
+            }
+        }
+    }
+    PersonalData get(const size_t &array_index) const override
+    {
+        if (array_index >= a_size)
+        {
+            std::cout << "Index out of bounds, returning default PersonalData.\n";
+            return PersonalData();
+        }
+        return array[array_index];
+    }
+    long long find(const PersonalData &record) const override
+    {
+        for (size_t index = 0; index < a_size; index++)
+        {
+            if (array[index] == record)
+            {
+                return index;
+            }
+        }
+        return -1; // РµСЃР»Рё Р·Р°РїРёСЃСЊ РЅРµ РЅР°Р№РґРµРЅР°, РІРѕР·РІСЂР°С‰Р°РµРј -1
+    }
+    long long size() const override { return a_size; }
+
+    void print_repository() const override
+    {
+        for (size_t index = 0; index < a_size; index++)
+        {
+            std::cout << array[index] << std::endl;
+        }
+    }
+};
