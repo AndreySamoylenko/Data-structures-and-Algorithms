@@ -110,6 +110,12 @@ public:
 
 #include <DataManager.hpp>
 
+void DataManager::remove(const Key &key)
+{
+    size_t index = indexed_struct.remove(key);
+    
+}
+
 // #include <functional>
 
 template <class T>
@@ -126,7 +132,7 @@ struct Node
 class RBtree : public IndexedStructure
 {
 private:
-    using N = Node<List*>;
+    using N = Node<List *>;
     N *root = nullptr;
 
     bool is_red(N *x) const { return x && x->red; }
@@ -243,7 +249,7 @@ private:
             else
                 break;
         }
-        
+
         if (y == x)
         {
             x->data->add(record.array_index);
@@ -481,18 +487,22 @@ public:
     }
     void remove(const Key &key)
     {
-        for(int index = 0; index < a_size; index++){
-            if(array[index].key == key){
-                array[index] = array[a_size-1];
-                a_size --;
+        for (int index = 0; index < a_size; index++)
+        {
+            if (array[index].key == key)
+            {
+                array[index] = array[a_size - 1];
+                a_size--;
                 return;
             }
         }
     }
     void update(const PersonalData &old_data, const PersonalData &new_data)
     {
-        for(int index = 0; index < a_size; index++){
-            if(array[index] == old_data){
+        for (int index = 0; index < a_size; index++)
+        {
+            if (array[index] == old_data)
+            {
                 array[index] = new_data;
                 return;
             }

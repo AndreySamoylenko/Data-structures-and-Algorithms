@@ -105,7 +105,7 @@ class IndexedStructure
 {
 public:
     virtual void add(const PersonalData &record) = 0;
-    virtual void remove(const Key &key) = 0;
+    virtual size_t remove(const Key &key) = 0;
     virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
 };
 
@@ -122,11 +122,7 @@ public:
         data_bank.add(record);
     };
 
-    void remove(const Key &key)
-    {
-        indexed_struct.remove(key);
-        data_bank.remove(key);
-    };
+    void remove(const Key &key);
 
     void update(const PersonalData &old_data, const PersonalData &new_data)
     {
