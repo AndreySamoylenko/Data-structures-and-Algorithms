@@ -131,7 +131,7 @@ class Associate_array
 public:
     virtual void insert(K k, V v) = 0;
     virtual void remove(K k, V v) = 0;
-    virtual V find(K k) const = 0;
+    virtual std::size_t *search(K k) const = 0;
 };
 
 template <typename V>
@@ -139,7 +139,8 @@ class HashTable : public Associate_array<Key, V>
 {
 private:
     std::pair<Key, V> *table = nullptr;
-    std::size_t size;
+    std::size_t t_capacity;
+    std::size_t t_size = 0;
     short *status;
 
 public:
@@ -147,8 +148,8 @@ public:
     {
         table = new std::pair<Key, V>[size_];
         status = new short[size_];
-        size = size_;
-        for (std::size_t i = 0; i < size; i++)
+        t_capacity = size_;
+        for (std::size_t i = 0; i < t_capacity; i++)
         {
             status[i] = 0;
         } // set statuses to "empty"
@@ -157,8 +158,8 @@ public:
     {
         table = new std::pair<Key, V>[1000];
         status = new short[1000];
-        size = 1000;
-        for (std::size_t i = 0; i < size; i++)
+        t_capacity = 1000;
+        for (std::size_t i = 0; i < t_capacity; i++)
         {
             status[i] = 0;
         } // set statuses to "empty"
@@ -170,7 +171,17 @@ public:
         delete[] status;
     }
 
-    std::size_t hash(Key key)
+    V get_value(std::size_t index)
+    {
+        return table[index].second;
+    }
+
+    Key get_key(std::size_t index)
+    {
+        return table[index].first;
+    }
+
+    std::size_t hash_(Key key)
     {
         std::size_t index = 0;
 
@@ -183,50 +194,86 @@ public:
             index += c;
         }
 
-        return index % size;
+        return index;
+    }
+
+    std::size_t hash(Key key, std::size_t i)
+    {
+        return (hash_(key) + i / 2 + i * i / 2) % t_capacity;
     }
 
     void insert(Key key, V v) override
     {
-        std::size_t i = hash(key);
-
-        if (status[i] == 1)
+        if (t_size == t_capacity)
         {
-            // collision
-        }
-
-        table[i].first = key;
-        table[i].second = v;
-    }
-
-    void remove()(Key key, V v) override
-    {
-        std::size_t i = hash(key);
-
-        if (status[i] == 0)
-        {
-            // nothing to remove
+            std::cout << "Key " << key << " not inserted (table is full)" << std::endl;
             return;
         }
-        if (status[i] == 2)
+
+        std::size_t i = 0;
+
+        do
         {
-            // collision
-        }
-        status[i] = 2
+            std::size_t j = hash(key, i);
+            if (status[j] == 0)
+            {
+                table[j].first = key;
+                table[j].second = v;
+                std::cout << "Key " << key << " inserted at index " << j << std::endl;
+                return;
+            }
+            i++;
+        } while (i != t_capacity);
+        std::cout << "Key " << key << " not inserted (table is full 2)" << std::endl;
     }
 
-    V find(Key key) override
+    std::size_t *search(Key key) override
     {
-        std::size_t i = hash(key);
-
-        if (status[i] == 0)
+        if (t_size == 0)
         {
-            return nullptr;
+            return nullptr; // not found due to emptiness of table
         }
-        if (status[i] == 2){
-            // collision
+
+        std::size_t i = 0;
+        std::size_t j = 0;
+
+        do
+        {
+            j = hash(key);
+            if (table[j].first == key)
+            {
+                std::cout << "Key " << key << "found at " << j << " index\n";
+                return &j;
+            }
+
+            i++;
+        } while (i != t_capacity && status[j] != 0);
+
+        std::cout << "Key " << key << " not found\n";
+        return nullptr; // not found
+    }
+
+    void remove(Key key, V v) override
+    {
+        if (t_size == 0)
+        {
+            return;
         }
-        return table[i].second;
+
+        std::size_t i = 0;
+        std::size_t j = 0;
+
+        do
+        {
+            j = hash(key);
+            if (table[j].first == key && table[j].second == v)
+            {
+                status[j] = 2;
+                return;
+            }
+
+            i++;
+        } while (i != t_capacity && status[j] != 0);
     }
 };
 
