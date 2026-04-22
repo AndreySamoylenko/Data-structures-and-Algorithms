@@ -92,13 +92,13 @@ int main()
 
     manager.get_data_bank().print_repository();
     std::cout << std::endl;
-    static_cast<RBtree &>(manager.get_indexed_structure()).print_in_order();
+    
     std::cout << std::endl;
     std::cout << std::endl;
 
 
 
-    PersonalData pd = {Date{1, 1, 2020}, FIO{"Петров", "Петр", "Петрович"}, 1, "Новая заявка"};
+    PersonalData pd = {Date{1, 1, 2020}, FIO{"P", "P", "P"}, 101, "P"};
     manager.add(pd);
 
     manager.get_data_bank().print_repository();
@@ -107,7 +107,7 @@ int main()
     std::cout << std::endl;
     std::cout << std::endl;
 
-    
+    pd = {Date{1, 1, 2020}, FIO{"P", "P", "P"}, 1001, "P"};
     manager.remove(pd);
 
 
@@ -117,7 +117,10 @@ int main()
     std::cout << std::endl;
     std::cout << std::endl;
 
-    pd = {Date{1, 1, 2020}, FIO{"Петров", "Петр", "Петрович"}, 1001, "ффф"};
+    
+    pd = {Date{1, 1, 2020}, FIO{"P", "P", "P"}, 101, "P"};
+    
+
     manager.remove(pd);
 
 

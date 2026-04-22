@@ -278,9 +278,8 @@ private:
 
     N *BST_insert(const PersonalData &record)
     {
-        Key key = record.key();
         // std::cout << "inserting " << key << std::endl;
-
+        Key key =  record.key();
         N *y = nullptr;
         N *x = root;
         // доходим до места вставки
@@ -288,15 +287,15 @@ private:
         {
             y = x;
             // std::cout << "traversing " << ((x->key < key) ? "right" : "left") << std::endl;
-            if (key < x->key)
+            if (record.key() < x->key)
             {
                 x = x->left;
             }
-            else if (key > x->key)
+            else if (record.key() > x->key)
             {
                 x = x->right;
             }
-            else if (x->key == key)
+            else if (x->key == record.key())
             { // если ключ уже есть, то просто добавляем индекс в список узла
                 // std::cout << "adding index to existing key " << key << std::endl;
                 x->data.add(record.array_index);

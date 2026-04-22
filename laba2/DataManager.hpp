@@ -135,6 +135,7 @@ public:
     virtual void print_repository() const = 0;
 };
 
+
 class IndexedStructure
 {
 public:
