@@ -1,0 +1,199 @@
+#pragma once
+
+#include <string>
+#include <iostream>
+
+struct Date
+{
+    unsigned short int day;
+    unsigned short int month;
+    unsigned int year;
+    size_t date_to_number() const { return (day + month * 100 + year * 10000); }
+
+    bool operator<(const Date &o) const { return date_to_number() < o.date_to_number(); }
+    bool operator>(const Date &o) const { return date_to_number() > o.date_to_number(); }
+    bool operator==(const Date &o) const { return date_to_number() == o.date_to_number(); }
+    bool operator!=(const Date &o) const { return date_to_number() != o.date_to_number(); }
+
+    friend std::ostream &operator<<(std::ostream &os, const Date &d)
+    {
+        os << ((d.day < 10) ? "0" : "") << (unsigned short int)d.day << "." << ((d.month < 10) ? "0" : "") << (unsigned short int)d.month << "." << (unsigned int)d.year;
+        return os;
+    }
+};
+
+struct FIO
+{
+    std::string surname;
+    std::string name;
+    std::string patronymic;
+
+    bool operator<(const FIO &o) const
+    {
+        if (surname < o.surname)
+            return true;
+        if (surname == o.surname && name < o.name)
+            return true;
+        if (surname == o.surname && name == o.name && patronymic < o.patronymic)
+            return true;
+        return false;
+    }
+    bool operator>(const FIO &o) const
+    {
+        if (surname > o.surname)
+            return true;
+        if (surname == o.surname && name > o.name)
+            return true;
+        if (surname == o.surname && name == o.name && patronymic > o.patronymic)
+            return true;
+        return false;
+    }
+    bool operator==(const FIO &o) const { return (surname == o.surname && name == o.name && patronymic == o.patronymic); }
+    bool operator!=(const FIO &o) const { return !(surname == o.surname && name == o.name && patronymic == o.patronymic); }
+
+    friend std::ostream &operator<<(std::ostream &os, const FIO &f)
+    {
+        os << f.surname << " " << f.name << " " << f.patronymic;
+        return os;
+    }
+};
+
+struct Key
+{
+    Date date;
+    FIO full_name;
+    bool operator<(const Key &o) const
+    {
+        if (date < o.date)
+            return true;
+        if (date == o.date && full_name < o.full_name)
+            return true;
+        return false;
+    }
+    bool operator>(const Key &o) const
+    {
+        if (date > o.date)
+            return true;
+        if (date == o.date && full_name > o.full_name)
+            return true;
+        return false;
+    }
+    bool operator==(const Key &o) const
+    {
+        return (date == o.date && full_name == o.full_name);
+    }
+    bool operator!=(const Key &o) const
+    {
+        return !(date == o.date && full_name == o.full_name);
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Key &k)
+    {
+        os << k.date << " | " << k.full_name;
+        return os;
+    }
+};
+
+struct PersonalData
+{
+    Date date;
+    FIO full_name;
+    size_t request_number;
+    std::string description;
+    size_t array_index; // индекс в массиве, который хранит все данные
+
+    bool operator<(const PersonalData &o) const { return (key() < o.key()); }
+    bool operator>(const PersonalData &o) const { return (key() > o.key()); }
+    bool operator==(const PersonalData &o) const
+    {
+        return (date == o.date) && (full_name == o.full_name) && (request_number == o.request_number) && (description == o.description);
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const PersonalData &pd)
+    {
+        os << pd.date << " | " << pd.full_name << " | " << (size_t)pd.request_number << " | " << pd.description;
+        return os;
+    }
+
+    Key key() const
+    {
+        Key k;
+        k.date = date;
+        k.full_name = full_name;
+        return k;
+    }
+};
+
+class Repository
+{
+public:
+    virtual void add(PersonalData &record) = 0;
+    virtual void remove(const PersonalData &record) = 0;
+    virtual void update(const PersonalData &old_data, const PersonalData &new_data) = 0;
+    virtual PersonalData get(const size_t &array_index) const = 0;
+    virtual long long find(const PersonalData &record) const = 0;
+    virtual long long size() const = 0;
+    virtual void print_repository() const = 0;
+};
+
+
+class IndexedStructure
+{
+public:
+    virtual void add(const PersonalData &record) = 0;
+    virtual void remove(const PersonalData &record) = 0;
+    virtual void update_index(const PersonalData &record, const size_t &new_index) = 0;
+    // virtual List find(const Key &key) const = 0;
+    virtual void print_structure() const = 0;
+};
+
+class DataManager
+{
+private:
+    IndexedStructure &indexed_struct;
+    Repository &data_bank;
+
+public:
+    DataManager(IndexedStructure &indexed_struct, Repository &data_bank) : indexed_struct(indexed_struct), data_bank(data_bank) {}
+
+    void add(PersonalData &record)
+    {
+        data_bank.add(record);      // добавляем запись в массив (внутри метода add массива уже выставляется правильный array_index)
+        indexed_struct.add(record); // добавляем запись с правильным индексом в дерево
+    }
+
+    void remove(const PersonalData &record)
+    {
+        long long array_index = data_bank.find(record);
+
+        if (array_index == -1) // если записи нет в массиве, то удалять нечего
+            return;
+
+        PersonalData last_record = data_bank.get(data_bank.size() - 1);
+        data_bank.remove(record); // затерли данные в массиве (теперь на месте удалённой записи стоит последняя запись массива)
+
+        indexed_struct.remove(record);                         
+        if (array_index == data_bank.size()) // если удалённая запись была последней в массиве
+        {                                    // то обновлять индекс в дереве не нужно, так как на её месте уже стоит последняя запись массива с правильным индексом
+            return;
+        }
+        std::cout << "Updating index of record: " << last_record << " from " << last_record.array_index << " to " << array_index << std::endl;
+
+        indexed_struct.update_index(last_record, array_index); // обновили индекс в дереве для записи, которая была последней в массиве и теперь стоит на месте удалённой записи
+        
+    }
+
+    void update(const PersonalData &old_data, const PersonalData &new_data)
+    {
+        long long array_index = data_bank.find(old_data);
+
+        if (array_index == -1) // если записи нет в массиве, то обновлять нечего
+            return;
+
+        data_bank.update(old_data, new_data); // обновляем запись в массиве
+
+        indexed_struct.remove(old_data); // удаляем старую запись из дерева
+        indexed_struct.add(new_data);    // добавляем новую запись в дерево с правильным индексом, который уже выставлен в массиве
+    }
+
+    ~DataManager() = default;
+};

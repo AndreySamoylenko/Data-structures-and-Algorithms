@@ -1,7 +1,8 @@
 // #pragma once
 #include <utility>
 #include <cstddef>
-
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -138,6 +139,8 @@ private:
 
     const float shrink_koef = 0.25;
     const float enlarge_koef = 0.75;
+    const short MIN_SIZE = 10;
+    const short DEFAULT_SIZE = 100;
 
     void shrink_rehash()
     {
@@ -145,7 +148,7 @@ private:
         short *old_status = status;
         std::size_t t_old_cap = t_capacity;
 
-        t_capacity /= 2;
+        t_capacity = ((t_capacity / 2 >= MIN_SIZE) ? t_capacity : MIN_SIZE);
         t_size = 0;
         table = new std::pair<Key, V>[t_capacity];
         status = new short[t_capacity];
@@ -192,6 +195,8 @@ private:
 public:
     HashTable(std::size_t size_)
     {
+        if (size_ < MIN_SIZE)
+            size_ = MIN_SIZE;
         table = new std::pair<Key, V>[size_];
         status = new short[size_];
         t_capacity = size_;
@@ -202,9 +207,9 @@ public:
     }
     HashTable()
     {
-        table = new std::pair<Key, V>[1000];
-        status = new short[1000];
-        t_capacity = 1000;
+        table = new std::pair<Key, V>[DEFAULT_SIZE];
+        status = new short[DEFAULT_SIZE];
+        t_capacity = DEFAULT_SIZE;
         for (std::size_t i = 0; i < t_capacity; i++)
         {
             status[i] = 0;
@@ -254,7 +259,7 @@ public:
 
     std::size_t hash(Key key, std::size_t i)
     {
-        return (std::size_t)(hash_(key) + (i  + i * i) / 2.0) % t_capacity;
+        return (std::size_t)(hash_(key) + (i + i * i) / 2.0) % t_capacity;
     }
 
     void insert(Key key, V v)
@@ -280,6 +285,10 @@ public:
                 t_size++;
                 if ((double)(t_size) / (t_capacity) > enlarge_koef)
                     enlarge_rehash();
+                return;
+            }
+            else if (key == table[j].first && v == table[j].second)
+            {
                 return;
             }
             i++;
@@ -310,9 +319,9 @@ public:
             }
 
             i++;
-        } while (i != t_capacity && status[j] == 2);
+        } while (i != t_capacity && status[j] != 0);
 
-        return result; 
+        return result;
     }
 
     void remove(Key key, V v)
@@ -363,29 +372,138 @@ public:
     }
 };
 
+template <typename T>
+void print_vector(const std::vector<T> vect)
+{
+    int n = vect.size();
+    std::cout << "[";
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << vect[i] << ' ';
+    }
+    std::cout << "]" << std::endl;
+}
+
+bool string_to_date(const std::string &date_str, Date &date)
+{
+    std::istringstream ss(date_str);
+    char delimiter1, delimiter2;
+    if (ss >> date.day >> delimiter1 >> date.month >> delimiter2 >> date.year)
+    {
+        if (delimiter1 == '.' && delimiter2 == '.')
+            return true;
+    }
+    return false;
+}
+
+bool string_to_fio(const std::string &fio_str, FIO &fio)
+{
+    std::istringstream ss(fio_str);
+    if (ss >> fio.surname >> fio.name >> fio.patronymic)
+        return true;
+
+    return false;
+}
+
+void read_data_from_file(const std::string &filename, HashTable<PersonalData> &table)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    std::string line;
+    size_t index = 0;
+    while (std::getline(file, line))
+    {
+        PersonalData record;
+        if (line.empty())
+            continue;
+        // Парсим дату
+        if (!string_to_date(line.substr(0, line.find('|')), record.date))
+        {
+            std::cerr << "Error parsing date in line: " << index + 1 << ": " << line << std::endl;
+            continue;
+        }
+        line = line.substr(line.find('|') + 1);
+        // Парсим ФИО
+        if (!string_to_fio(line.substr(0, line.find('|')), record.full_name))
+        {
+            std::cerr << "Error parsing FIO in line: " << index + 1 << ": " << line << std::endl;
+            continue;
+        }
+        line = line.substr(line.find('|') + 1);
+        // Парсим номер заявки
+        try
+        {
+            record.request_number = std::stoul(line.substr(0, line.find('|')));
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error parsing request number in line: " << index + 1 << ": " << line << std::endl;
+        }
+        line = line.substr(line.find('|') + 2);
+        // Остаток строки - описание
+        record.description = line;
+        record.array_index = index;
+        table.insert(record.key(),record);
+        // std::cout << record << std::endl;
+
+        index++;
+    }
+}
+
 int main()
 {
+    HashTable<PersonalData> htfile(10);
+    read_data_from_file("input.txt", htfile);
+    htfile.print_table();
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+
+
     HashTable<int> ht(10);
 
     Key k1{{1, 1, 2020}, {"I", "I", "I"}};
     Key k2{{1, 2, 2020}, {"I", "I", "I"}};
     Key k3{{1, 3, 2020}, {"I", "I", "I"}};
     Key k4{{1, 4, 2020}, {"I", "I", "I"}};
+    Key k5{{1, 4, 2020}, {"I", "I", "hohoho"}};
 
+    ht.insert(k1, 100);
+    ht.insert(k1, 100);
+    ht.insert(k1, 100);
     ht.insert(k1, 100);
     ht.insert(k2, 200);
     ht.insert(k2, 300);
     ht.insert(k4, 400);
     ht.insert(k1, 500);
-    ht.insert(k4, 600);
     ht.insert(k2, 700);
     ht.insert(k3, 800);
     ht.insert(k3, 900);
 
     ht.print_table();
+    std::cout << std::endl;
 
-    // std::cout <<  ht.search(k1);
-    
+    print_vector(ht.search(k1));
+    print_vector(ht.search(k2));
+    print_vector(ht.search(k3));
+    print_vector(ht.search(k4));
+    print_vector(ht.search(k5));
+    std::cout << "empty vector means 'not found'\n";
+    std::cout << std::endl;
+
+
+    ht.remove(k1, 100);
+    ht.remove(k1, 200);
+    ht.remove(k2, 100);
+    ht.remove(k2, 300);
+
+    ht.print_table();
+    std::cout << std::endl;
 
     return 0;
 }
